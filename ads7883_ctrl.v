@@ -9,7 +9,7 @@ module ads7883_ctrl(
 	output reg                  ads7883_sclk,       //ADC芯片时钟信号
 	output reg                  ads7883_ncs         //ADC片选信号，低电平ADC进入转换模式，高电平ADC进入采集模式同时SDO计入高阻态
 );
-parameter CLK_STEP;             //ADC时钟步长
+parameter CLK_STEP;             //ADC时钟步长，当前值是2
 
 reg [9:0] adc_clk_cnt;          //保存线性序列机计数器计数值
 
@@ -19,9 +19,9 @@ reg signed [11:0] adc_buffer;   //中途保存ADC数据的寄存器
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
         adc_clk_cnt <= 1'd0;
-    else if(adc_clk_cnt<(10'd35*CLK_STEP-1)&&(en_adc||adc_clk_cnt>10'd0))
+    else if(adc_clk_cnt<10'd34*CLK_STEP && (en_adc||adc_clk_cnt>10'd0))
         adc_clk_cnt <= adc_clk_cnt+1'b1;
-    else if(adc_clk_cnt==(10'd35*CLK_STEP-1))
+    else if(adc_clk_cnt==10'd34*CLK_STEP)
         adc_clk_cnt <= 10'd0;
 end
 
@@ -101,7 +101,7 @@ always @(posedge clk or negedge rst_n) begin
                 ads7883_sclk    <= 1'b0;
                 adc_buffer[1]   <= ads7883_sdo;
             end
-            26*CLK_STEP: ads7883_sclk <= 1'b1;//转换结束
+            26*CLK_STEP: ads7883_sclk <= 1'b1;//第13个时钟周期的上升沿，转换结束
             27*CLK_STEP: begin
                 ads7883_sclk    <= 1'b0;
                 adc_buffer[0]   <= ads7883_sdo;
@@ -110,9 +110,9 @@ always @(posedge clk or negedge rst_n) begin
                 adc_data <= adc_buffer;     //将接收到的12位数据赋给输出端口，数据更新完成
             end
             28*CLK_STEP: ads7883_sclk <= 1'b1;
-            29*CLK_STEP: ads7883_sclk <= 1'b0;//输出第一个滞后0
+            29*CLK_STEP: ads7883_sclk <= 1'b0;//第14个时钟周期的下降沿，输出第一个滞后0
             30*CLK_STEP: ads7883_sclk <= 1'b1;
-            31*CLK_STEP: ads7883_sclk <= 1'b0;//输出第二个滞后0
+            31*CLK_STEP: ads7883_sclk <= 1'b0;//第15个时钟周期的下降沿，输出第二个滞后0
             32*CLK_STEP: ads7883_sclk <= 1'b1;
             33*CLK_STEP: begin
                 ads7883_sclk    <= 1'b0;
@@ -120,9 +120,8 @@ always @(posedge clk or negedge rst_n) begin
             end
             34*CLK_STEP: begin
                 data_upflag     <= 1'b1;     //数据更新完成标志置一
-                ads7883_sclk    <= 1'b1;
+                ads7883_sclk    <= 1'b1;     //采样转换读取数据的一个周期结束
             end
-            35*CLK_STEP-1: ads7883_sclk <= 1'b0;
             default: ;
         endcase
     end
