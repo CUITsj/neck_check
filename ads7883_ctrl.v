@@ -11,18 +11,18 @@ module ads7883_ctrl(
 );
 parameter CLK_STEP;             //ADC时钟步长，当前值是2
 
-reg [9:0] adc_clk_cnt;          //保存线性序列机计数器计数值
+reg [6:0] adc_clk_cnt;          //保存线性序列机计数器计数值，计数范围是0-68，7位二进制足够。
 
 reg signed [11:0] adc_buffer;   //中途保存ADC数据的寄存器
 
 //AD时钟周期计数
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
-        adc_clk_cnt <= 1'd0;
-    else if(adc_clk_cnt<10'd34*CLK_STEP && (en_adc||adc_clk_cnt>10'd0))
+        adc_clk_cnt <= 7'd0;
+    else if(adc_clk_cnt < 7'd34*CLK_STEP && en_adc)
         adc_clk_cnt <= adc_clk_cnt+1'b1;
-    else if(adc_clk_cnt==10'd34*CLK_STEP)
-        adc_clk_cnt <= 10'd0;
+    else if(adc_clk_cnt == 7'd34*CLK_STEP)
+        adc_clk_cnt <= 7'd0;
 end
 
 //在一个线性系列机计数器周期内按照ads7883时序进行数据接收，获取AD值
@@ -116,12 +116,12 @@ always @(posedge clk or negedge rst_n) begin
             32*CLK_STEP: ads7883_sclk <= 1'b1;
             33*CLK_STEP: begin
                 ads7883_sclk    <= 1'b0;
-                ads7883_ncs     <= 1'b1;
+                ads7883_ncs     <= 1'b1;//片选信号拉高
             end
             34*CLK_STEP: begin
                 data_upflag     <= 1'b1;     //数据更新完成标志置一
                 ads7883_sclk    <= 1'b1;     //采样转换读取数据的一个周期结束
-            end
+            end                             //片选信号拉高20纳秒超过tw1的10纳秒符合时序规则
             default: ;
         endcase
     end

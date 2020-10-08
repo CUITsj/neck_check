@@ -11,10 +11,10 @@ module kalman_filter(
 parameter [11:0] Q;                 //过程协方差矩阵
 parameter [11:0] R;                 //观测协方差矩阵
 
-reg signed [11:0] x_last;         //上一次的估计值
+reg signed [11:0] x_last;           //上一次的估计值
 reg signed [11:0] x_fore;           //预测值
 
-reg signed [11:0] p_last;          //上一次的估计值和真实值的协方差矩阵
+reg signed [11:0] p_last;           //上一次的估计值和真实值的协方差矩阵
 reg signed [11:0] p_fore;           //估计值和真实值的协方差矩阵
 
 reg signed [23:0] kg_num;			//卡尔曼增益分子
@@ -145,8 +145,8 @@ always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         filtered_data <= 13'd0;
         filter_finish <= 1'b0;
-        x_last <= 12'd2048;      //给上一次的估计值赋初值
-        p_last <= 12'd0;       //给上一次的估计值和真实值的协方差矩阵赋初值
+        x_last <= 12'd2048;         //给上一次的估计值赋初值
+        p_last <= 12'd0;            //给上一次的估计值和真实值的协方差矩阵赋初值
     end
     else if(en_kalman) begin
         filtered_data   <=  x_new[12:0];    //输出卡尔曼滤波值
