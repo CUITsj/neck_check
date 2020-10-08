@@ -48,7 +48,7 @@ pll_clk u_pll_clk(
 
 //例化ADC模块
 ads7883_ctrl #(
-    .CLK_STEP           (2)                //ADC时钟步长
+    .CLK_STEP           (3)                //ADC时钟步长
 ) u_ads7883_ctrl(
     .clk                (clk_100m),         //adc时钟
     .rst_n              (rst_n),            //复位
