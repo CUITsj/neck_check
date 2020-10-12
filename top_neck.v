@@ -17,19 +17,19 @@ wire adc_finish_flag;                       //adc模块转换完成标志
 wire signed [11:0] adc_data;                //adc最终数据
 
 //kalman滤波      
-wire signed [12:0] filtered_data;           //卡尔曼滤波后数据
+wire signed [11:0] filtered_data;           //卡尔曼滤波后数据
 wire filter_finish;                         //卡尔曼滤波完成标志
         
 //一阶微分      
-wire signed [12:0] first_dif_data;          //一阶微分输出数据
+wire signed [11:0] first_dif_data;          //一阶微分输出数据
 wire first_dif_finish;                      //一阶微分完成标志
         
 //二阶微分      
-wire signed [12:0] second_dif_data;         //二阶微分输出数据
+wire signed [11:0] second_dif_data;         //二阶微分输出数据
 wire second_dif_finish;                     //二阶微分完成标志
         
 //三阶微分      
-wire signed [12:0] third_dif_data;          //三阶微分输出数据
+wire signed [11:0] third_dif_data;          //三阶微分输出数据
 wire third_dif_finish;                      //三阶微分完成标志
 
 //缩颈判断
@@ -48,7 +48,7 @@ pll_clk u_pll_clk(
 
 //例化ADC模块
 ads7883_ctrl #(
-    .CLK_STEP           (3)                //ADC时钟步长
+    .CLK_STEP           (2)                //ADC时钟步长
 ) u_ads7883_ctrl(
     .clk                (clk_100m),         //adc时钟
     .rst_n              (rst_n),            //复位

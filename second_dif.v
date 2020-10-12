@@ -2,7 +2,7 @@ module second_dif(
 	input                       clk,                //时钟信号
 	input                       rst_n,              //复位信号
 	input                       en_second_dif,      //使能二阶微分
-	input [12:0]                current_data,       //当前数据
+	input [11:0]                current_data,       //当前数据
 	                                                
 	output reg signed [12:0]    second_dif_data,    //微分后数据
 	output reg                  second_dif_finish   //微分完成标志
@@ -20,9 +20,9 @@ reg [2:0] state;
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         state               <= WAIT;
-        second_dif_data     <= 12'd0;
-        last_one_data       <= 12'd0;
-        last_two_data       <= 12'd0;
+        second_dif_data     <= 13'd0;
+        last_one_data       <= 13'd0;
+        last_two_data       <= 13'd0;
         second_dif_finish   <= 1'b0;
     end
     else begin
