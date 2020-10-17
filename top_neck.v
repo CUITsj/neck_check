@@ -13,22 +13,22 @@ wire rst_n;                                 //复位信号
 wire locked;                                //locked信号拉高,锁相环开始稳定输出时钟 
         
 //ADC      
-wire adc_finish_flag;                       //adc模块转换完成标志
-wire signed [11:0] adc_data;                //adc最终数据
+wire adc_finish;                            //adc模块转换完成标志
+wire signed [12:0] adc_data;                //adc最终数据
 
 //kalman滤波      
-wire signed [11:0] filtered_data;           //卡尔曼滤波后数据
+wire signed [12:0] filtered_data;           //卡尔曼滤波后数据
 wire filter_finish;                         //卡尔曼滤波完成标志
         
 //微分      
-wire signed [11:0] first_dif_data;          //一阶微分输出数据    
-wire signed [11:0] second_dif_data;         //二阶微分输出数据      
-wire signed [11:0] third_dif_data;          //三阶微分输出数据
+wire signed [12:0] first_dif_data;          //一阶微分输出数据    
+wire signed [12:0] second_dif_data;         //二阶微分输出数据      
+wire signed [12:0] third_dif_data;          //三阶微分输出数据
 wire dif_finish;                            //微分完成标志
         
 //系统复位与锁相环locked相与,作为其它模块的复位信号 
 assign  rst_n = sys_rst_n & locked; 
-    
+
 //例化PLL IP核
 pll_clk u_pll_clk(
     .areset             (~sys_rst_n),       //复位取反
@@ -39,12 +39,12 @@ pll_clk u_pll_clk(
 
 //例化ADC模块
 ads7883_ctrl #(
-    .CLK_STEP           (2)                //ADC时钟步长
+    .CLK_STEP           (2)                 //ADC时钟步长
 ) u_ads7883_ctrl(
     .clk                (clk_100m),         //adc时钟
     .rst_n              (rst_n),            //复位
     .en_adc             (1),	            //开始转换使能信号
-    .data_upflag        (adc_finish_flag),	//转换完成信号
+    .adc_finish         (adc_finish),	    //转换完成信号
     .adc_data           (adc_data),	        //采样结果
     .ads7883_sdo        (ads7883_sdo),      //adc模块数据端口
     .ads7883_sclk       (ads7883_sclk),     //adc模块时钟端口
@@ -53,11 +53,12 @@ ads7883_ctrl #(
 
 //例化卡尔曼滤波模块
 kalman_filter #(
-    .Q                  (1),                //过程噪声协方差
-    .R                  (400)               //观测噪声协方差
-) u_kalman_filter(                          
+    .Q                  (40),               //过程噪声协方差
+    .R                  (1)                 //观测噪声协方差
+) u_kalman_filter(     
+    .clk                (clk_100m),
     .rst_n              (rst_n),            //复位信号
-    .en_kalman          (adc_finish_flag),  //滤波使能信号
+    .en_kalman          (adc_finish),       //滤波使能信号
     .origin_data        (adc_data),         //滤波原始数据
     .filtered_data      (filtered_data),    //滤波后数据
     .filter_finish      (filter_finish)     //滤波完成标志
@@ -65,6 +66,7 @@ kalman_filter #(
 
 //例化微分模块
 dif u_dif(
+    .clk                (clk_100m),
     .rst_n              (rst_n),            //复位信号
     .en_dif             (filter_finish),    //三阶微分使能信号
     .current_data       (filtered_data),    //三阶微分前数据
@@ -76,6 +78,7 @@ dif u_dif(
 
 //例化缩颈信号判断模块
 neck_judge u_neck_judge(
+    .clk                (clk_100m),
     .rst_n              (rst_n),            //复位信号
     .en_judge           (dif_finish),
     .first_order_data   (first_dif_data),   //一阶微分数据
