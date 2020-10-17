@@ -17,19 +17,19 @@ reg signed [12:0] x_fore;           //预测值
 reg signed [12:0] p_last;           //上一次的估计值和真实值的协方差矩阵
 reg signed [12:0] p_fore;           //估计值和真实值的协方差矩阵
 
-reg signed [23:0] kg_small_num;			//卡尔曼增益分子
+reg signed [23:0] kg_small_num;		//卡尔曼增益分子
 reg signed [12:0] kg_den;			//卡尔曼增益分母
-reg signed [23:0] kg_small;               //卡尔曼增益
+reg signed [23:0] kg_small;         //卡尔曼增益
   
-reg signed [12:0] xnew_mul;			//x_new的分母
-reg signed [35:0] xnew_small_add;	//x_new左移后(放大)的加数
+reg signed [12:0] xnew_mul;			//x_new的乘数
+reg signed [35:0] xnew_small_add;	//x_new右移后变小的加数
   
-reg signed [23:0] xnew_big_add;	//x_new右移后(还原)的加数
+reg signed [23:0] xnew_big_add;	    //x_new左移后放大的加数
 reg signed [24:0] x_new;            //新的估计值
   
-reg signed [35:0] pnew_small_sub;	//估计值和真实值的协方差左移后（放大）的被减数
+reg signed [35:0] pnew_small_sub;	//估计值和真实值的协方差右移变小后的被减数
   
-reg signed [23:0] pnew_big_sub;	//估计值和真实值的协方差右移后（还原）的被减数
+reg signed [23:0] pnew_big_sub;	    //估计值和真实值的协方差左移后放大后的被减数
 reg signed [12:0] p_new;            //新的估计值和真实值的协方差矩阵
 
 
@@ -50,8 +50,8 @@ always @(posedge clk or negedge rst_n) begin
 	end
 	else
         //先验估计
-		x_fore <= x_last;                       //卡尔曼滤波公式一: 根据上一次的估计值计算预测值
-        p_fore <= p_last+Q;                     //卡尔曼滤波公式二: 计算预测值和真实值之间的协方差矩阵
+		x_fore <= x_last;                       //根据上一次的估计值计算预测值
+        p_fore <= p_last+Q;                     //计算预测值和真实值之间的协方差矩阵
         
         //计算缩小后的卡尔曼增益kg_small
         kg_small_num <= p_fore<<12;             //卡尔曼增益分子增大2的12次方倍
@@ -60,9 +60,9 @@ always @(posedge clk or negedge rst_n) begin
         
         //后验估计，计算卡尔曼滤波值
         xnew_mul <= origin_data-x_fore;         //计算估计值（滤波值）其中一个加数的分母
-        xnew_small_add <= kg_small*xnew_mul;           //计算估计值（滤波值）其中一个加数
+        xnew_small_add <= kg_small*xnew_mul;    //计算估计值（滤波值）其中一个加数
         xnew_big_add <= xnew_small_add>>12;     //将估计值（滤波值）其中一个加数缩小2的12次方倍
-        x_new <= x_fore+xnew_big_add;           //卡尔曼公式4:计算新的估计值
+        x_new <= x_fore+xnew_big_add;           //计算新的预测值
         
         //更新
         pnew_small_sub <= kg_small*p_fore;      //计算新的估计值和真实值协方差矩阵其中的被减数

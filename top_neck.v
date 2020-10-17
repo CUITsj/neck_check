@@ -2,6 +2,7 @@ module top_neck(
 	input   sys_clk,            //系统时钟
 	input   sys_rst_n,          //系统复位
 	input   ads7883_sdo,        //adc模块数据端口
+    
 	output  ads7883_sclk,       //adc模块时钟信号
 	output  ads7883_ncs,        //adc模块片选信号
 	output  power_switch        //电焊机电源控制
