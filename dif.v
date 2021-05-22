@@ -17,6 +17,8 @@ reg signed [12:0] last_three_data;  //上上上次的输入值
 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
+        first_dif_data      <= 13'd0;
+        second_dif_data     <= 13'd0;
         third_dif_data      <= 13'd0;
         last_one_data       <= 13'd0;
         last_two_data       <= 13'd0;

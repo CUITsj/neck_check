@@ -2,10 +2,12 @@ module top_neck(
 	input   sys_clk,            //系统时钟
 	input   sys_rst_n,          //系统复位
 	input   ads7883_sdo,        //adc模块数据端口
+    input   ctl_switch,         //0:IGBT常开，1:IGBT受程序控制。
     
 	output  ads7883_sclk,       //adc模块时钟信号
 	output  ads7883_ncs,        //adc模块片选信号
-	output  power_switch        //电焊机电源控制
+	output  power_switch,        //电焊机电源控制
+    output  led
 );
 
 //ip核       
@@ -82,10 +84,18 @@ neck_judge u_neck_judge(
     .clk                (clk_100m),
     .rst_n              (rst_n),            //复位信号
     .en_judge           (dif_finish),
+    .ctl_switch         (ctl_switch),
     .first_order_data   (first_dif_data),   //一阶微分数据
     .second_order_data  (second_dif_data),  //二阶微分数据
     .third_order_data   (third_dif_data),   //三阶微分数据
-    .power_switch       (power_switch),     //判断完成标志
+    .power_switch       (power_switch)      //判断完成标志
+);
+
+flash_led u_flash_led(
+    .clk                (clk_100m),
+    .rst_n              (rst_n),
+    .ctl_switch         (ctl_switch),
+    .led                (led)
 );
 
 endmodule
