@@ -15,6 +15,7 @@ reg signed [12:0] last_one_data;    //上次的输入值
 reg signed [12:0] last_two_data;    //上上次的输入值
 reg signed [12:0] last_three_data;  //上上上次的输入值
 
+//要迭代4次之后才能每次输出三个有效的差分值
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         first_dif_data      <= 13'd0;
