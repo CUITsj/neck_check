@@ -32,10 +32,13 @@ wire signed [12:0] first_dif_data;          //一阶微分输出数据
 wire signed [12:0] second_dif_data;         //二阶微分输出数据      
 wire signed [12:0] third_dif_data;          //三阶微分输出数据
 wire dif_finish;                            //微分完成标志
+
+wire signed [12:0] same_data;
         
 //系统复位与锁相环locked相与,作为其它模块的复位信号 
 assign  rst_n = sys_rst_n & locked; 
 
+//固定不改
 //例化PLL IP核
 pll_clk u_pll_clk(
     .areset             (~sys_rst_n),       //复位取反
@@ -44,6 +47,7 @@ pll_clk u_pll_clk(
     .locked             (locked)            //locked信号拉高,锁相环开始稳定输出时钟 
 );
 
+//固定不改
 //例化ADC模块,700纳秒以内获取一个AD值
 ads7883_ctrl #(
     .CLK_STEP           (2)                 //ADC时钟步长
@@ -58,6 +62,7 @@ ads7883_ctrl #(
     .ads7883_ncs        (ads7883_ncs)       //adc模块片选端口
 );
 
+//固定不改
 //例化卡尔曼滤波模块
 kalman_filter #(
     // Q越大，越信任测量值，波形噪音越大
@@ -77,6 +82,7 @@ kalman_filter #(
     .filter_finish      (filter_finish)     //滤波完成标志
 );
 
+
 //例化数据取样周期模块
 sample_period_ctrl u_sample_period_ctrl(
     .clk                (clk_100m),
@@ -87,7 +93,6 @@ sample_period_ctrl u_sample_period_ctrl(
     .sample_finish      (sample_finish)
 );
                                           
-
 //例化微分模块
 dif u_dif(
     .clk                (clk_100m),
@@ -105,6 +110,7 @@ neck_judge u_neck_judge(
     .clk                (clk_100m),
     .rst_n              (rst_n),            //复位信号
     .en_judge           (dif_finish),
+    .adc_data           (adc_data),
     .ctrl_switch        (ctrl_switch),      //控制缩颈检测开关
     .first_order_data   (first_dif_data),   //一阶微分数据
     .second_order_data  (second_dif_data),  //二阶微分数据
